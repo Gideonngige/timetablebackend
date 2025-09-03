@@ -16,6 +16,7 @@ TEACHERS = {
 
 DAYS = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
 
+
 def generate_time_slots():
     slots = []
     start_time = datetime.strptime("08:00", "%H:%M")
@@ -25,28 +26,32 @@ def generate_time_slots():
     while start_time < end_time:
         end_slot = start_time + lesson_duration
 
-        if start_time.strftime("%H:%M") == "10:35":
-            slots.append(("Break", start_time.strftime("%I:%M %p"), "11:05 AM"))
+        # Insert short break between 10:35 - 11:05
+        if start_time >= datetime.strptime("10:35", "%H:%M") and start_time < datetime.strptime("11:05", "%H:%M"):
+            slots.append(("Break", "10:35 AM", "11:05 AM"))
             start_time = datetime.strptime("11:05", "%H:%M")
             continue
 
-        if start_time.strftime("%H:%M") == "13:05":
-            slots.append(("Lunch", start_time.strftime("%I:%M %p"), "02:05 PM"))
+        # Insert lunch break between 1:05 - 2:05
+        if start_time >= datetime.strptime("13:05", "%H:%M") and start_time < datetime.strptime("14:05", "%H:%M"):
+            slots.append(("Lunch", "01:05 PM", "02:05 PM"))
             start_time = datetime.strptime("14:05", "%H:%M")
             continue
 
+        # Normal lesson slot
         slots.append(("Lesson", start_time.strftime("%I:%M %p"), end_slot.strftime("%I:%M %p")))
         start_time = end_slot
 
     return slots
 
+
+
 def distribute_subjects():
-    weekly_plan = []
-    subject_pool = SUBJECTS * 5
+    # Shuffle subjects across the week
+    subject_pool = SUBJECTS * 10  # more pool to cover many lessons
     random.shuffle(subject_pool)
-    for i in range(30):
-        weekly_plan.append(subject_pool[i % len(subject_pool)])
-    return weekly_plan
+    return subject_pool
+
 
 def generate_timetable(classes):
     timetable = {}
@@ -72,7 +77,7 @@ def generate_timetable(classes):
                 else:
                     timetable[school_class][day].append({
                         "time": f"{slot[1]} - {slot[2]}",
-                        "subject": slot[0],
+                        "subject": slot[0],  # Break or Lunch
                         "teacher": "-"
                     })
     return timetable
